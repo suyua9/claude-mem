@@ -180,6 +180,13 @@ export class DataRoutes extends BaseRouteHandler {
       return;
     }
 
+    if (!memorySessionIds.every((id): id is string => typeof id === 'string')) {
+      this.badRequest(res, 'memorySessionIds must be an array of strings');
+      return;
+    }
+
+    memorySessionIds = memorySessionIds.map((id) => id.trim()).filter(Boolean);
+
     const store = this.dbManager.getSessionStore();
     const sessions = store.getSdkSessionsBySessionIds(memorySessionIds);
     res.json(sessions);

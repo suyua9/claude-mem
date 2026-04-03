@@ -185,6 +185,28 @@ describe('DataRoutes Type Coercion', () => {
       expect(jsonSpy).toHaveBeenCalled();
     });
 
+    it('should trim whitespace from native string arrays and drop empty values', () => {
+      const { req, res, jsonSpy } = createMockReqRes({ memorySessionIds: [' abc ', ' ', 'def'] });
+      handler(req as Request, res as Response);
+
+      expect(mockGetSdkSessionsBySessionIds).toHaveBeenCalledWith(['abc', 'def']);
+      expect(jsonSpy).toHaveBeenCalled();
+    });
+
+    it('should reject arrays containing non-string values', () => {
+      const { req, res, statusSpy } = createMockReqRes({ memorySessionIds: ['abc', 42] });
+      handler(req as Request, res as Response);
+
+      expect(statusSpy).toHaveBeenCalledWith(400);
+    });
+
+    it('should reject JSON-encoded arrays containing non-string values', () => {
+      const { req, res, statusSpy } = createMockReqRes({ memorySessionIds: '["abc",42]' });
+      handler(req as Request, res as Response);
+
+      expect(statusSpy).toHaveBeenCalledWith(400);
+    });
+
     it('should reject non-array, non-string values', () => {
       const { req, res, statusSpy } = createMockReqRes({ memorySessionIds: 42 });
       handler(req as Request, res as Response);
